@@ -1,63 +1,173 @@
-# User API web application
+# EveryOne - Local SLM Marketplace
 
-It is a basic NodeJS web application exposing REST API that creates and stores user parameters in [Redis database](https://redis.io/).
+Marketplace local de modèles SLM pour:
+- uploader des PDFs,
+- choisir un modèle,
+- discuter avec les documents,
+- télécharger des modèles GGUF en local.
 
-## Functionality
+Le projet contient:
+- un frontend React + Vite (UI marketplace),
+- un backend FastAPI (ingestion, recherche locale, chat, download GGUF).
 
-1. Start a web server
-2. Create a user
+## Stack
 
-## Installation
+### Frontend
+- React 19
+- Vite 7
+- Tailwind CSS 4
 
-This application is written on NodeJS and it uses Redis database.
+### Backend
+- FastAPI
+- Uvicorn
+- SQLite
+- sentence-transformers
+- huggingface_hub
 
-1. [Install NodeJS](https://nodejs.org/en/download/)
+## Structure
 
-2. [Install Redis](https://redis.io/download)
-
-3. Install application
-
-Go to the root directory of the application (where `package.json` file located) and run:
-
+```text
+app-slm/
+├─ src/                  # Frontend React
+├─ backend/              # API FastAPI
+├─ models/               # Modèles GGUF téléchargés localement (créé automatiquement)
+├─ package.json
+└─ vite.config.js
 ```
-npm install 
-```
 
-## Usage
+## Démarrage rapide (Frontend)
 
-1. Start a web server
-
-From the root directory of the project run:
-
-```
-npm start
-```
-
-It will start a web server available in your browser at http://localhost:3000.
-
-2. Create a user
-
-Send a POST (REST protocol) request using terminal:
+1. **Installe Node.js d'abord** (version 18+ recommandée):
+	- https://nodejs.org/
+2. Ouvre un terminal dans le dossier `app-slm`.
+3. Lance les commandes npm dans cet ordre:
 
 ```bash
-curl --header "Content-Type: application/json" \
-  --request POST \
-  --data '{"username":"sergkudinov","firstname":"sergei","lastname":"kudinov"}' \
-  http://localhost:3000/user
+npm install
+npm run dev
 ```
 
-It will output:
+4. Ouvre le site sur:
 
+```text
+http://localhost:5173
 ```
-{"status":"success","msg":"OK"}
+
+## Prérequis complets
+
+- Node.js 18+
+- npm 9+
+- Python 3.10+
+- pip
+
+## Installation backend (optionnel mais recommandé)
+
+Depuis `app-slm/backend`:
+
+```bash
+pip install -r requirements-api.txt
+# Si tu veux toutes les dépendances ML (plus lourd):
+# pip install -r requirements.txt
 ```
 
-Another way to test your REST API is to use [Postman](https://www.postman.com/).
+## Lancer le projet en local
 
-## Testing
+Ouvre 2 terminaux.
 
-From the root directory of the project, run:
+### Terminal 1 - Backend (port 8000)
 
+Depuis `app-slm/backend`:
+
+```bash
+uvicorn api:app --reload --host 127.0.0.1 --port 8000
 ```
-npm test
+
+### Terminal 2 - Frontend (port 5173)
+
+Depuis `app-slm`:
+
+```bash
+npm install
+npm run dev
 ```
+
+Frontend: `http://localhost:5173`
+
+## Variables d'environnement
+
+### Frontend (optionnel)
+
+Tu peux créer un `.env` dans `app-slm`:
+
+```env
+VITE_BACKEND_PROXY_TARGET=http://127.0.0.1:8000
+VITE_API_BASE_URL=
+```
+
+Notes:
+- en dev, le proxy Vite redirige `/api` vers le backend,
+- `VITE_API_BASE_URL` peut rester vide si tu utilises le proxy.
+
+### Backend (optionnel, recommandé pour modèles privés/rate limits)
+
+```env
+HF_TOKEN=ton_token_huggingface
+```
+
+ou
+
+```env
+HUGGINGFACE_HUB_TOKEN=ton_token_huggingface
+```
+
+## Télécharger un modèle GGUF en local
+
+Quand tu cliques sur `Download` dans l'UI:
+- le frontend appelle `POST /api/models/download`,
+- le backend télécharge le modèle depuis Hugging Face,
+- le fichier `.gguf` est stocké dans:
+
+```text
+app-slm/models/<model-id>/
+```
+
+Exemples:
+- `app-slm/models/llama-3.2-3b/`
+- `app-slm/models/qwen-2.5-3b/`
+
+## Scripts frontend
+
+Depuis `app-slm`:
+
+```bash
+npm run dev      # Lance le serveur de dev
+npm run build    # Build production
+npm run preview  # Prévisualise le build
+npm run lint     # Lint du code
+```
+
+## Endpoints API principaux
+
+- `GET /api/health`
+- `POST /api/init`
+- `POST /api/ingest`
+- `POST /api/chat`
+- `POST /api/models/download`
+
+## Dépannage rapide
+
+- Erreur `ECONNREFUSED 127.0.0.1:8000`:
+	- le backend n'est pas démarré.
+- Erreur au download Hugging Face:
+	- vérifie ta connexion,
+	- configure `HF_TOKEN` si besoin,
+	- vérifie les droits d'écriture dans `app-slm/models`.
+- Build frontend:
+
+```bash
+npx vite build
+```
+
+## Licence
+
+Projet hackathon / usage interne. Ajoute ta licence ici si nécessaire.
