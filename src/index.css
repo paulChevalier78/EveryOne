@@ -1,104 +1,97 @@
+/* index.css */
 @import "tailwindcss";
 
 :root {
-  --brand-surface: #0d1224;
-  --brand-panel: #131a34;
-  --brand-panel-soft: #1a2343;
-  --brand-purple: #7c3aed;
-  --brand-purple-soft: #c4b5fd;
-  --brand-orange: #fb923c;
-  --brand-orange-deep: #f97316;
-  --ink: #f6f8fc;
-  --muted-ink: #a2acc2;
-  --brand-line: rgba(255, 255, 255, 0.12);
+  --brand-surface: #050505; /* Deep studio black */
+  --brand-panel: rgba(10, 10, 10, 0.7);
+  --brand-panel-soft: rgba(20, 20, 20, 0.5);
+  --brand-line: rgba(255, 255, 255, 0.06);
+  --ink: #fcfcfc;
+  --muted-ink: #888888;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
 body {
   margin: 0;
   background: var(--brand-surface);
   color: var(--ink);
-  font-family: "Sora", "Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif;
-  scroll-behavior: smooth;
+  font-family: "Inter", system-ui, -apple-system, sans-serif; /* */
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-#root {
-  min-height: 100vh;
+/* --- LE FOND ANIMÉ ULTRA-SMOOTH --- */
+.animated-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* Reste derrière le contenu */
+  overflow: hidden;
+  background: #050505; /* Fond noir profond */
 }
 
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px); /* Flou intense pour un aspect vaporeux */
+  opacity: 0.5;
+  mix-blend-mode: screen; /* Mélange harmonieux des couleurs */
+  /* Animation longue (40s) pour un effet apaisant */
+  animation: organic-move 40s ease-in-out infinite alternate;
+}
+
+.blob-1 {
+  width: 90vw;
+  height: 90vw;
+  /* Gradient radial pour une transition douce vers le noir */
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.8) 0%, transparent 70%); 
+  top: -20%;
+  right: -10%;
+  animation-duration: 35s;
+}
+
+.blob-2 {
+  width: 80vw;
+  height: 80vw;
+  background: radial-gradient(circle, rgba(251, 146, 60, 0.7) 0%, transparent 70%);
+  bottom: -15%;
+  left: -10%;
+  animation-duration: 45s;
+  animation-delay: -5s;
+}
+
+/* Animation fluide sur 4 étapes pour simuler un mouvement de fluide */
+@keyframes organic-move {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translate(10%, 5%) rotate(10deg) scale(1.1);
+  }
+  66% {
+    transform: translate(-5%, 15%) rotate(-10deg) scale(0.9);
+  }
+  100% {
+    transform: translate(5%, -5%) rotate(5deg) scale(1);
+  }
+}
+
+/* --- GLASSMORPHISM ÉPURÉ --- */
+.glass {
+  background: rgba(5, 5, 5, 0.3); /* Très transparent pour laisser voir le fond */
+  backdrop-filter: blur(15px); /* Flou de verre accentué */
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* --- UTILITAIRES --- */
 .smooth-fade-in {
-  animation: smoothFadeIn 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: minimalistFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* */
 }
 
-.card-lift {
-  transition:
-    transform 180ms ease,
-    box-shadow 200ms ease,
-    border-color 180ms ease;
+@keyframes minimalistFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.card-lift:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.24);
-  border-color: rgba(124, 58, 237, 0.45);
-}
-
-.brand-hero-surface {
-  background: var(--brand-panel);
-  border: 1px solid var(--brand-line);
-}
-
-.brand-button-primary {
-  background: var(--brand-purple);
-  color: #fff;
-  transition: background 180ms ease, transform 180ms ease;
-}
-
-.brand-button-primary:hover {
-  background: #6d28d9;
-  transform: translateY(-1px);
-}
-
-.brand-button-secondary {
-  border: 1px solid rgba(124, 58, 237, 0.4);
-  background: rgba(124, 58, 237, 0.16);
-  color: #ddd6fe;
-  transition: background 180ms ease, border-color 180ms ease;
-}
-
-.brand-button-secondary:hover {
-  border-color: rgba(124, 58, 237, 0.62);
-  background: rgba(124, 58, 237, 0.24);
-}
-
-@keyframes smoothFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Hide scrollbar but keep functionality */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Line clamp for text truncation */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

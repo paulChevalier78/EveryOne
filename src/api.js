@@ -5,7 +5,6 @@ async function parseJsonSafe(response) {
   if (!text) {
     return {};
   }
-
   try {
     return JSON.parse(text);
   } catch {
@@ -19,7 +18,7 @@ function buildUrl(path) {
 
 export async function initializeBackend() {
   const response = await fetch(buildUrl("/api/init"), {
-    method: "POST",
+    method: "POST", // Correspond à @app.post("/api/init")
   });
 
   if (!response.ok) {
@@ -35,7 +34,7 @@ export async function ingestSinglePdf(file) {
   formData.append("files", file);
 
   const response = await fetch(buildUrl("/api/ingest"), {
-    method: "POST",
+    method: "POST", // Correspond à @app.post("/api/ingest")
     body: formData,
   });
 
@@ -55,7 +54,7 @@ export async function ingestSinglePdf(file) {
 
 export async function sendChatMessage({ message, selectedModel, selectedModelId, documentIds, topK = 5 }) {
   const response = await fetch(buildUrl("/api/chat"), {
-    method: "POST",
+    method: "POST", // Correspond à @app.post("/api/chat")
     headers: {
       "Content-Type": "application/json",
     },
@@ -79,7 +78,7 @@ export async function sendChatMessage({ message, selectedModel, selectedModelId,
 
 export async function downloadModelGguf({ modelId }) {
   const response = await fetch(buildUrl("/api/models/download"), {
-    method: "POST",
+    method: "POST", // Correspond à @app.post("/api/models/download")
     headers: {
       "Content-Type": "application/json",
     },
@@ -97,7 +96,7 @@ export async function downloadModelGguf({ modelId }) {
 
 export async function fetchLocalModels() {
   const response = await fetch(buildUrl("/api/models/local"), {
-    method: "GET",
+    method: "GET", // Correspond à @app.get("/api/models/local")
   });
 
   const payload = await parseJsonSafe(response);
@@ -109,13 +108,17 @@ export async function fetchLocalModels() {
   return Array.isArray(payload) ? payload : [];
 }
 
+/**
+ * Télécharge le modèle fine-tuné depuis Modal vers le stockage local.
+ * Correspond à @app.post("/api/finetune/download")
+ */
 export async function downloadFinetunedModel({ customName }) {
   const response = await fetch(buildUrl("/api/finetune/download"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ customName }),
+    body: JSON.stringify({ customName }), // Attend customName comme défini dans FinetuneDownloadRequest
   });
 
   const payload = await parseJsonSafe(response);
@@ -124,5 +127,25 @@ export async function downloadFinetunedModel({ customName }) {
     throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
   }
 
+  return payload;
+}
+
+/**
+ * Déclenche le job de fine-tuning sur Modal.
+ * Adapté pour correspondre à @app.post("/api/finetune")
+ */
+export async function startFinetuning({ datasetName }) {
+  // Changement de l'URL vers /api/finetune pour correspondre au backend
+  const response = await fetch(buildUrl("/api/finetune"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    // Attend datasetName comme défini dans FinetuneRequest
+    body: JSON.stringify({ datasetName }), 
+  });
+
+  const payload = await parseJsonSafe(response);
+  if (!response.ok) {
+    throw new Error(payload.detail || payload.message || "Fine-tuning failed to start.");
+  }
   return payload;
 }

@@ -1,36 +1,18 @@
 import React, { useState } from "react";
 import BrandShell from "./components/BrandShell";
 import { SLM_DOWNLOADS } from "./content/models";
-import { MODEL_LOGOS } from "./content/modelLogos";
 import { downloadModelGguf } from "./api";
 
 export default function DiscoverModels({ onNavigate }) {
-  const [copiedId, setCopiedId] = useState("");
   const [downloadingId, setDownloadingId] = useState("");
   const [downloadMessage, setDownloadMessage] = useState("");
-
-  const handleCopy = async (entry) => {
-    try {
-      await navigator.clipboard.writeText(entry.command);
-      setCopiedId(entry.id);
-      setTimeout(() => setCopiedId(""), 1200);
-    } catch {
-      setCopiedId("");
-    }
-  };
 
   const handleDownload = async (entry) => {
     setDownloadMessage("");
     setDownloadingId(entry.id);
-
     try {
       const result = await downloadModelGguf({ modelId: entry.id });
-      const count = Array.isArray(result.downloadedFiles)
-        ? result.downloadedFiles.length
-        : 0;
-      setDownloadMessage(
-        `✅ ${entry.name} téléchargé en local (${count} fichier${count > 1 ? "s" : ""}) dans ${result.targetDir}`
-      );
+      setDownloadMessage(`✅ ${entry.name} saved to ${result.targetDir}`);
     } catch (error) {
       setDownloadMessage(`❌ ${error.message || "Download failed."}`);
     } finally {
@@ -39,81 +21,49 @@ export default function DiscoverModels({ onNavigate }) {
   };
 
   return (
-    <BrandShell
-      activePage="discover"
-      onNavigate={onNavigate}
-      primaryLabel="Your models"
-      onPrimaryAction={() => onNavigate("your-models")}
-    >
-      <main className="mx-auto w-full max-w-[1240px] px-4 pb-14 pt-10 md:px-7">
-        <section className="smooth-fade-in">
-          <h1 className="text-4xl font-black tracking-[-0.02em] md:text-5xl">Discover Models</h1>
-          <p className="mt-3 max-w-[720px] text-base font-medium text-[var(--muted-ink)] md:text-lg">
-            Browse all 5 marketplace models and add the ones you need.
+    <BrandShell activePage="discover" onNavigate={onNavigate} primaryLabel="Your Library" onPrimaryAction={() => onNavigate("your-models")}>
+      <main className="mx-auto max-w-6xl px-6 py-20">
+        <section className="smooth-fade-in mb-16">
+          <h1 className="text-5xl font-medium tracking-tighter">Discover Models</h1>
+          <p className="mt-4 text-[var(--muted-ink)] text-lg font-light">
+            Expand your local intelligence with our curated SLM catalog.
           </p>
           {downloadMessage && (
-            <p className="mt-3 rounded-lg border border-[var(--brand-line)] bg-[var(--brand-panel)] p-3 text-sm text-[var(--ink)]">
+            <p className="mt-6 text-xs uppercase tracking-widest text-white border-l border-white pl-4 py-1">
               {downloadMessage}
             </p>
           )}
         </section>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {SLM_DOWNLOADS.map((entry) => (
-            <article
-              key={entry.id}
-              className="rounded-2xl border border-[var(--brand-line)] bg-[var(--brand-panel)] p-5"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted-ink)]">
+            <article key={entry.id} className="group flex flex-col rounded-2xl border border-[var(--brand-line)] bg-white/[0.01] p-8 transition-all hover:bg-white/[0.03] hover:border-[var(--muted-ink)]">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--muted-ink)]">
                   {entry.family} • {entry.size}
-                </p>
+                </span>
                 {entry.mandatory && (
-                  <span className="rounded-full bg-[var(--brand-orange)]/18 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#FFD4AE]">
-                    Core
-                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white">Core</span>
                 )}
               </div>
 
-              <h2 className="mt-2 text-lg font-bold text-[var(--ink)]">{entry.name}</h2>
-              <div className="mt-2 flex h-11 items-center justify-center rounded-lg border border-[var(--brand-line)] bg-gradient-to-r from-[var(--brand-purple)]/20 to-[var(--brand-orange)]/20">
-                <img
-                  src={MODEL_LOGOS[entry.id]}
-                  alt={`${entry.name} logo`}
-                  className="h-7 w-7 rounded object-contain"
-                />
-              </div>
-              <p className="mt-2 text-sm text-[var(--muted-ink)]">{entry.description}</p>
+              <h2 className="text-xl font-medium text-white mb-2">{entry.name}</h2>
+              <p className="text-sm text-[var(--muted-ink)] font-light leading-relaxed mb-6 line-clamp-2">
+                {entry.description}
+              </p>
 
-              {/* Why use explanation */}
-              <div className="mt-3 rounded-lg bg-[var(--brand-purple)]/10 p-3">
-                <p className="text-xs font-semibold text-[var(--brand-purple-soft)]">
-                  💡 {entry.whyUse}
-                </p>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-sm font-semibold text-[var(--brand-orange)]">
-                  {entry.priceLabel}
-                </span>
-                <span className="text-xs font-medium text-[var(--muted-ink)]">{entry.quant}</span>
-              </div>
-
-              <div className="mt-4 grid gap-2">
+              <div className="mt-auto space-y-4">
+                <div className="flex items-center justify-between border-t border-[var(--brand-line)] pt-4">
+                  <span className="text-xs font-medium text-white">{entry.priceLabel}</span>
+                  <span className="text-[10px] text-[var(--muted-ink)] uppercase tracking-widest">{entry.quant}</span>
+                </div>
+                
                 <button
-                  type="button"
                   onClick={() => handleDownload(entry)}
                   disabled={downloadingId === entry.id}
-                  className="rounded-xl bg-[var(--brand-purple)] px-3 py-2 text-center text-sm font-semibold text-white hover:bg-[#6D28D9]"
+                  className="w-full rounded-full bg-white py-3 text-xs font-bold uppercase tracking-widest text-black transition-transform active:scale-95 disabled:opacity-20"
                 >
-                  {downloadingId === entry.id ? "Downloading..." : "Download"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(entry)}
-                  className="rounded-xl border border-[var(--brand-line)] px-3 py-2 text-sm font-semibold text-[var(--ink)] hover:bg-white/5"
-                >
-                  {copiedId === entry.id ? "Command copied" : "Copy CLI command"}
+                  {downloadingId === entry.id ? "Syncing..." : "Download"}
                 </button>
               </div>
             </article>
