@@ -1,6 +1,3 @@
-Here is the translated `README.md` content in English:
-
-```markdown
 # Local Intelligence for EveryOne
 
 This project contains:
@@ -126,6 +123,4 @@ VITE_API_BASE_URL=
 2. **Backend (same shell)**:
 ```bash
 CORS_ORIGINS=http://localhost:5173,http://192.168.x.x:5173 uvicorn api:app --host 0.0.0.0 --port 8000
-```
-
 ```
