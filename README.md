@@ -1,88 +1,131 @@
-# app-slm (Frontend + Backend)
+Here is the translated `README.md` content in English:
 
-Ce projet contient:
-- un frontend React/Vite dans `src/`
-- un backend FastAPI dans `backend/`
+```markdown
+# Local Intelligence for EveryOne
 
-Le frontend appelle le backend sur `/api/*`.
+This project contains:
+- A React/Vite frontend in `src/`
+- A FastAPI backend in `backend/`
+- A Serverless Fine-Tuning pipeline via Modal in `modal_app.py`
 
-## 1) Lancer le backend
+The frontend calls the local backend on `/api/*`, which handles RAG, local inference (llama.cpp), and delegates fine-tuning to the cloud (Modal).
 
-Depuis `backend/`:
+---
+
+## 🚀 Key Features
+
+* **100% Local Inference**: Chat with GGUF models (Llama, Phi, Qwen, Mistral) downloaded to your machine for total privacy.
+* **RAG & Drag-and-Drop**: Ingest your PDFs from the home page or drop them **directly into the chat window** to add them to the AI context in real-time.
+* **1-Click Fine-Tuning**: Train your own models (LoRA -> Merge -> Q4_K_M GGUF Quantization) on Modal's cloud GPUs directly from the web interface.
+* **Dynamic Management**: Download, rename, and load your fine-tuned models into memory without restarting the server.
+
+---
+
+## 1) Installation & Python Environment
+
+We use a single **Python 3.10** virtual environment at the root of the project, which serves both the backend and deployment tools.
+
+Navigate to the project root and create the virtual environment:
 
 ```bash
-./venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000 --reload
+python3.10 -m venv .venv
 ```
 
-Healthcheck:
+**Activating the environment:**
+* On Windows: `.\.venv\Scripts\activate`
+* On Mac/Linux: `source .venv/bin/activate`
 
+**Installing dependencies:**
+While still at the project root:
 ```bash
-curl http://127.0.0.1:8000/api/health
+pip install -r requirements.txt
 ```
 
-## 2) Lancer le frontend
+**Starting the FastAPI backend:**
+Navigate to the `backend/` folder to start the server:
+```bash
+cd backend
+uvicorn api:app --host 127.0.0.1 --port 8000 --reload
+```
 
-Depuis la racine `app-slm/`:
+> **Healthcheck**: `curl http://127.0.0.1:8000/api/health`
+
+---
+
+## 2) Launching the Frontend
+
+From the project root, install Node dependencies and launch Vite:
 
 ```bash
+npm install
 npm run dev
 ```
 
-Par defaut, Vite proxy `/api` vers `http://127.0.0.1:8000`.
+By default, Vite configures a proxy from `/api` to `http://127.0.0.1:8000`.
 
-## Variables d'environnement
+---
 
-Copier `.env.example` vers `.env` si tu veux personnaliser les URLs:
+## 3) Fine-Tuning Configuration (Modal)
+
+To use the Fine-Tuning feature ("🚀 Fine-Tune Model"), you must configure Modal.
+
+1. Create an account on [modal.com](https://modal.com) and authenticate your terminal:
+   ```bash
+   modal setup
+   ```
+2. Create a Modal secret containing your HuggingFace token (to download base weights):
+   ```bash
+   modal secret create huggingface-secret HF_TOKEN=hf_your_token_here
+   ```
+3. Deploy the training script to Modal servers:
+   ```bash
+   modal deploy backend/finetune.py
+   ```
+4. **Important**: Modal will return an API URL (e.g., `https://your-username--llama32-gguf-finetune...`). Copy this URL and update the `MODAL_URL` variable in the `/api/finetune` route within your `backend/api.py` file.
+
+---
+
+## 📁 Local Model Architecture (GGUF)
+
+The backend automatically scans the `backend/Model/` directory to find `.gguf` models.
+
+If you use the "⬇️ Download Finetuned" button from the Web interface, the backend will use the Modal CLI to automatically retrieve the cloud-generated `.gguf` model to this local directory with your chosen name.
+
+Verify models recognized by the backend:
+```bash
+curl http://127.0.0.1:8000/api/models/local
+```
+The `isLoaded` field indicates if the GGUF file is currently loaded in VRAM/RAM.
+
+---
+
+## 📄 PDF Ingestion & RAG
+
+- **Anti-duplication**: Previously indexed PDFs are not re-integrated, detected via SHA-256 file hashing.
+- **Precision**: Chunks store the original page number (`chunks.page`), and chat sources display the page.
+- **Transparency**: Chat responses explicitly display cited sources (PDF title, page number, and relevance score).
+
+---
+
+## 🌐 Environment Variables & Network Deployment
+
+Copy `.env.example` to `.env` if you wish to host the backend and frontend on separate machines:
 
 ```bash
 cp .env.example .env
 ```
 
-- `VITE_BACKEND_PROXY_TARGET`: cible backend pour le proxy Vite (dev)
-- `VITE_API_BASE_URL`: URL backend explicite (laisser vide pour utiliser le proxy Vite)
-- `CORS_ORIGINS`: origines autorisees cote backend, separees par des virgules
+If your backend is running on a different machine (e.g., IP `10.0.0.12`):
 
-## Inference GGUF locale
-
-Le backend peut faire l'inference locale avec des modeles `.gguf` places dans:
-
-`backend/Model`
-
-Exemple detecte:
-- `backend/Model/Tinyllama1.1/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf`
-- `backend/Model/Phi2/phi-2.Q4_K_M.gguf`
-- `backend/Model/Qwen2_1.5B/qwen2-1_5b-instruct-q4_k_m.gguf`
-
-Installer le runtime une fois:
-
-```bash
-cd backend
-./venv/bin/pip install -r requirements-api.txt
-```
-
-Verifier les modeles reconnus:
-
-```bash
-curl http://127.0.0.1:8000/api/models/local
-```
-
-Le champ `isLoaded` indique si le fichier GGUF est deja charge en memoire.
-
-## Ingestion PDF
-
-- Un PDF deja indexe n'est pas reintegre: detection par hash SHA-256 du fichier.
-- Les chunks stockent le numero de page (`chunks.page`), et les sources du chat affichent la page.
-
-## Exemple d'URL non locale
-
-Si ton backend tourne sur une autre machine:
-
-1. Frontend `.env`:
+1. **Frontend (`.env`)**:
 ```env
 VITE_BACKEND_PROXY_TARGET=http://10.0.0.12:8000
 VITE_API_BASE_URL=
 ```
-2. Backend (meme shell):
+
+2. **Backend (same shell)**:
 ```bash
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173 ./venv/bin/uvicorn api:app --host 0.0.0.0 --port 8000
+CORS_ORIGINS=http://localhost:5173,http://192.168.x.x:5173 uvicorn api:app --host 0.0.0.0 --port 8000
+```
+
 ```
