@@ -1,3 +1,5 @@
+![Demo](demo.jpg)
+
 # Local Intelligence for EveryOne
 
 This project contains:
