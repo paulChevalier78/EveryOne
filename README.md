@@ -1,5 +1,8 @@
-![Demo](demo.jpg)
-
+<div align="center">
+  <img src="demo.jpeg" alt="Demo" width="300"/>
+  <br>
+  <br>
+</div>
 # Local Intelligence for EveryOne
 
 This project contains:
