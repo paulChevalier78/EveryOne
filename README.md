@@ -3,6 +3,7 @@
   <br>
   <br>
 </div>
+
 # Local Intelligence for EveryOne
 
 This project contains:
