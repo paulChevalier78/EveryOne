@@ -130,3 +130,14 @@ VITE_API_BASE_URL=
 ```bash
 CORS_ORIGINS=http://localhost:5173,http://192.168.x.x:5173 uvicorn api:app --host 0.0.0.0 --port 8000
 ```
+
+---
+
+## 👥 Authors
+
+- **Gabriel Guiet-Dupré** — [LinkedIn](https://www.linkedin.com/in/gabriel-guiet-dupré)
+- **Malik Hassane** — [LinkedIn](https://www.linkedin.com/in/malik-hassane)
+- **Paul Chevalier** — [LinkedIn](https://www.linkedin.com/in/paul-chevalier)
+- **Elias Moussouni** — [LinkedIn](https://www.linkedin.com/in/elias-moussouni)
+- **Ziyad Amzil** — [LinkedIn](https://www.linkedin.com/in/ziyad-amzil)
+
